@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mcp-proxy-dev",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["tsx", "src/local.ts"],
+      "port": 3000
+    }
+  ]
+}
