@@ -67,14 +67,7 @@ export function applyInboundMapping(
       const key = field.from!;
       value = args[key] ?? field.default;
       if (value === undefined || value === null) {
-        // Check if this was a required param (schema drives that, not mapping, but we surface error)
-        if (field.default === undefined) {
-          throw Object.assign(
-            new Error(`MAPPING_ERROR: Required field "${key}" is missing and has no default`),
-            { code: 'MAPPING_ERROR' }
-          );
-        }
-        continue; // optional, skip
+        continue; // field not provided and no default — silently omit (required validation is Zod's job)
       }
     }
 
