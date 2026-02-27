@@ -1,0 +1,123 @@
+version: "1.0"
+
+server:
+  name: mcp-proxy-demo
+  description: Demo server — real public APIs, no auth required
+
+defaults:
+  timeout_ms: 10000
+
+tools:
+  # ── GET: open-meteo.com ────────────────────────────────────────────────────
+  - name: get_weather
+    description: Get current weather for a lat/lon via open-meteo.com (free, no auth)
+    protocol: rest
+    endpoint: https://api.open-meteo.com/v1/forecast
+    method: GET
+    input:
+      schema:
+        - name: latitude
+          type: number
+          required: true
+          description: Latitude (e.g. 43.70 for Nice, France)
+        - name: longitude
+          type: number
+          required: true
+          description: Longitude (e.g. 7.26 for Nice, France)
+      mapping:
+        - from: latitude
+          to: latitude
+          location: query
+        - from: longitude
+          to: longitude
+          location: query
+        - static: "true"
+          to: current_weather
+          location: query
+    output:
+      mapping:
+        - from: current_weather.temperature
+          to: temperature
+          location: body
+        - from: current_weather.windspeed
+          to: windspeed
+          location: body
+        - from: current_weather.weathercode
+          to: weathercode
+          location: body
+        - from: current_weather.is_day
+          to: is_day
+          location: body
+
+  # ── GET: genderize.io ──────────────────────────────────────────────────────
+  - name: get_gender
+    description: Predict gender for a given name using genderize.io (free, no auth)
+    protocol: rest
+    endpoint: https://api.genderize.io/
+    method: GET
+    input:
+      schema:
+        - name: name
+          type: string
+          required: true
+          description: First name to predict gender for
+      mapping:
+        - from: name
+          to: name
+          location: query
+    output:
+      mapping:
+        - from: name
+          to: name
+          location: body
+        - from: gender
+          to: gender
+          location: body
+        - from: probability
+          to: probability
+          location: body
+
+  # ── POST: jsonplaceholder.typicode.com ────────────────────────────────────
+  - name: create_post
+    description: Create a new post on JSONPlaceholder (fake test API, always returns 201)
+    protocol: rest
+    endpoint: https://jsonplaceholder.typicode.com/posts
+    method: POST
+    input:
+      schema:
+        - name: title
+          type: string
+          required: true
+          description: Post title
+        - name: body
+          type: string
+          required: true
+          description: Post body content
+        - name: user_id
+          type: integer
+          required: true
+          description: Author user ID
+      mapping:
+        - from: title
+          to: title
+          location: body
+        - from: body
+          to: body
+          location: body
+        - from: user_id
+          to: userId
+          location: body
+    output:
+      mapping:
+        - from: id
+          to: id
+          location: body
+        - from: title
+          to: title
+          location: body
+        - from: body
+          to: body
+          location: body
+        - from: userId
+          to: userId
+          location: body
