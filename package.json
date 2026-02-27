@@ -9,6 +9,7 @@
     "start": "node dist/local.js",
     "deploy": "npm run build && serverless deploy",
     "typecheck": "tsc --noEmit",
+    "demo": "node scripts/demo.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
