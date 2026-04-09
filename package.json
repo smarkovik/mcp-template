@@ -1,0 +1,33 @@
+{
+  "name": "mcp-proxy",
+  "version": "1.0.0",
+  "description": "Config-driven MCP proxy server for REST and XML-RPC endpoints",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/local.ts",
+    "start": "node dist/local.js",
+    "deploy": "npm run build && serverless deploy",
+    "typecheck": "tsc --noEmit",
+    "demo": "node scripts/demo.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.1",
+    "ajv": "^8.17.1",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.160",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.10.0",
+    "@vitest/coverage-v8": "^4.0.18",
+    "serverless": "^3.38.0",
+    "serverless-plugin-typescript": "^2.1.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.18"
+  }
+}

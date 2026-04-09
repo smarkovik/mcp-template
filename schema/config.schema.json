@@ -1,0 +1,147 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MCP Proxy Config",
+  "type": "object",
+  "required": ["version", "server", "tools"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "type": "string" },
+    "server": {
+      "type": "object",
+      "required": ["name", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      }
+    },
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "timeout_ms": { "type": "number" },
+        "auth": { "$ref": "#/definitions/AuthConfig" },
+        "headers": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "tools": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/ToolDefinition" }
+    }
+  },
+  "definitions": {
+    "AuthConfig": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "enum": ["apikey", "basic", "none"] },
+        "header": { "type": "string" },
+        "value": { "type": "string" },
+        "username": { "type": "string" },
+        "password": { "type": "string" }
+      }
+    },
+    "ParameterSchema": {
+      "type": "object",
+      "required": ["name", "type", "required", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["string", "number", "integer", "boolean", "object", "array"]
+        },
+        "required": { "type": "boolean" },
+        "description": { "type": "string" },
+        "default": {}
+      }
+    },
+    "MappingField": {
+      "type": "object",
+      "required": ["to", "location"],
+      "additionalProperties": false,
+      "properties": {
+        "from": { "type": "string" },
+        "to": { "type": "string" },
+        "location": {
+          "type": "string",
+          "enum": ["path", "query", "body", "header", "param", "struct"]
+        },
+        "type": { "type": "string" },
+        "transform": {
+          "type": "string",
+          "enum": [
+            "uppercase",
+            "lowercase",
+            "to_string",
+            "to_int",
+            "to_float",
+            "to_boolean",
+            "iso_to_unix",
+            "unix_to_iso",
+            "base64_encode",
+            "base64_decode",
+            "json_stringify",
+            "json_parse"
+          ]
+        },
+        "default": {},
+        "index": { "type": "number" },
+        "static": {}
+      }
+    },
+    "ToolDefinition": {
+      "type": "object",
+      "required": ["name", "description", "protocol", "endpoint", "input", "output"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "description": { "type": "string" },
+        "protocol": { "type": "string", "enum": ["rest", "xmlrpc"] },
+        "endpoint": { "type": "string" },
+        "method": {
+          "type": "string",
+          "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"]
+        },
+        "xmlrpc_method": { "type": "string" },
+        "timeout_ms": { "type": "number" },
+        "auth": { "$ref": "#/definitions/AuthConfig" },
+        "headers": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "input": {
+          "type": "object",
+          "required": ["schema", "mapping"],
+          "additionalProperties": false,
+          "properties": {
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/ParameterSchema" }
+            },
+            "mapping": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/MappingField" }
+            }
+          }
+        },
+        "output": {
+          "type": "object",
+          "required": ["mapping"],
+          "additionalProperties": false,
+          "properties": {
+            "mapping": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/MappingField" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

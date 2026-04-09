@@ -1,0 +1,211 @@
+version: "1.0"
+
+server:
+  name: mcp-proxy
+  description: Config-driven MCP proxy for REST and XML-RPC endpoints
+
+defaults:
+  timeout_ms: 5000
+  auth:
+    type: apikey
+    header: Authorization
+    value: Bearer ${API_KEY}
+  headers:
+    X-Source: mcp-proxy
+
+tools:
+  # -------------------------------------------------------------------------
+  # Example 1: REST GET — path + query parameters
+  # -------------------------------------------------------------------------
+  - name: get_order
+    description: Fetch a single order by ID
+    protocol: rest
+    endpoint: https://api.example.com/orders/{order_id}
+    method: GET
+
+    input:
+      schema:
+        - name: order_id
+          type: string
+          required: true
+          description: The order ID to fetch
+
+        - name: include_items
+          type: boolean
+          required: false
+          default: false
+          description: Include line items in the response
+
+      mapping:
+        - from: order_id
+          to: order_id
+          location: path
+
+        - from: include_items
+          to: include_items
+          location: query
+          type: boolean
+
+    output:
+      mapping:
+        - from: id
+          to: order_id
+          location: body
+        - from: status
+          to: status
+          location: body
+        - from: total_amount
+          to: total
+          location: body
+
+  # -------------------------------------------------------------------------
+  # Example 2: REST POST — JSON body with nested fields and static value
+  # -------------------------------------------------------------------------
+  - name: create_coupon
+    description: Create a discount coupon
+    protocol: rest
+    endpoint: https://api.example.com/coupons
+    method: POST
+    auth:
+      type: none  # override default auth for this tool
+
+    input:
+      schema:
+        - name: code
+          type: string
+          required: true
+          description: Coupon code
+
+        - name: discount_percent
+          type: number
+          required: true
+          description: Discount percentage (0-100)
+
+        - name: expires_at
+          type: string
+          required: false
+          description: Expiry date in ISO 8601 format
+
+      mapping:
+        - from: code
+          to: coupon_code
+          location: body
+
+        - from: discount_percent
+          to: discount.percentage
+          location: body
+          type: float
+
+        - from: expires_at
+          to: expiry_date
+          location: body
+
+        - static: "percent"
+          to: discount.type
+          location: body
+
+    output:
+      mapping:
+        - from: coupon_id
+          to: id
+          location: body
+        - from: coupon_code
+          to: code
+          location: body
+        - from: created_at
+          to: created_at
+          location: body
+
+  # -------------------------------------------------------------------------
+  # Example 3: XML-RPC — positional parameters
+  # -------------------------------------------------------------------------
+  - name: get_product_stock
+    description: Check stock level for a product in a warehouse
+    protocol: xmlrpc
+    endpoint: https://erp.example.com/RPC2
+    xmlrpc_method: inventory.getStock
+
+    input:
+      schema:
+        - name: product_id
+          type: integer
+          required: true
+          description: Numeric product ID
+
+        - name: warehouse
+          type: string
+          required: true
+          description: Warehouse location code
+
+      mapping:
+        - from: product_id
+          to: param
+          location: param
+          index: 0
+          type: int
+
+        - from: warehouse
+          to: param
+          location: param
+          index: 1
+          type: string
+
+    output:
+      mapping:
+        - from: quantity
+          to: stock_level
+          location: body
+        - from: last_updated
+          to: updated_at
+          location: body
+
+  # -------------------------------------------------------------------------
+  # Example 4: XML-RPC — struct parameter
+  # -------------------------------------------------------------------------
+  - name: update_contact
+    description: Update a CRM contact record
+    protocol: xmlrpc
+    endpoint: https://crm.example.com/api
+    xmlrpc_method: crm.updateContact
+
+    input:
+      schema:
+        - name: contact_id
+          type: string
+          required: true
+          description: CRM contact ID
+
+        - name: email
+          type: string
+          required: false
+          description: New email address
+
+        - name: phone
+          type: string
+          required: false
+          description: New phone number
+
+      mapping:
+        - from: contact_id
+          to: id
+          location: struct
+          index: 0
+
+        - from: email
+          to: email_address
+          location: struct
+          index: 0
+
+        - from: phone
+          to: phone_number
+          location: struct
+          index: 0
+
+    output:
+      mapping:
+        - from: success
+          to: updated
+          location: body
+        - from: message
+          to: message
+          location: body
